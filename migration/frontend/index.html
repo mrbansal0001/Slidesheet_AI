@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SlideSheet AI Workspace</title>
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body data-page="app">
+    <header class="topbar">
+      <div>
+        <h1>SlideSheet AI</h1>
+        <p class="subtitle">Upload files, choose documents, and chat with citations.</p>
+      </div>
+      <div class="topbar-actions">
+        <span id="userBadge" class="user-badge"></span>
+        <button id="logoutBtn" type="button" class="btn btn-muted">Logout</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel">
+        <h2>Upload</h2>
+        <input id="fileInput" type="file" accept=".pptx,.xlsx" multiple />
+        <button id="uploadBtn" type="button" class="btn">Upload Selected</button>
+        <p id="uploadStatus" class="status"></p>
+
+        <h2>Documents</h2>
+        <p id="docsHint" class="hint">Select docs used for retrieval.</p>
+        <div id="docList" class="doc-list"></div>
+      </aside>
+
+      <section class="panel chat-panel">
+        <div id="messages" class="messages"></div>
+        <form id="chatForm" class="chat-form">
+          <textarea id="questionInput" placeholder="Ask a question about your documents..." rows="2" required></textarea>
+          <button id="sendBtn" type="submit" class="btn">Send</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,81 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: chatbot
+      POSTGRES_USER: chatbot
+      POSTGRES_PASSWORD: chatbot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatbot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      # Owner connection — used only for `alembic upgrade head` (the Dockerfile CMD) and startup
+      # seeding. Actual request handling connects as APP_DB_ROLE instead (derived automatically
+      # from this URL by app/db/session.py) so that PostgreSQL RLS (migration 0006) applies; the
+      # owner role is exempt from RLS like any table owner.
+      DATABASE_URL: postgresql+psycopg://chatbot:chatbot@db:5432/chatbot
+      APP_DB_ROLE: ${APP_DB_ROLE:-chatbot_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD}
+      REDIS_URL: redis://redis:6379/0
+      INGESTION_MODE: celery
+      AUTO_CREATE_TABLES: "false"
+      ALLOW_DEV_AUTH: "false"
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY}
+      STORAGE_PATH: /app/storage
+      SEED_TEST_EMAIL: test@gmail.com
+      SEED_TEST_PASSWORD: "test@1234"
+      SEED_TEST_ORG: Test Org
+    volumes:
+      - document_storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: celery -A app.workers.celery_app.celery_app worker --loglevel=INFO
+    environment:
+      # Owner connection isn't used by the worker for anything DDL-shaped, but ingestion writes
+      # as APP_DB_ROLE (derived automatically, same as above) so RLS applies to worker-written
+      # rows the same as API-written ones.
+      DATABASE_URL: postgresql+psycopg://chatbot:chatbot@db:5432/chatbot
+      APP_DB_ROLE: ${APP_DB_ROLE:-chatbot_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?set APP_DB_PASSWORD}
+      REDIS_URL: redis://redis:6379/0
+      AUTO_CREATE_TABLES: "false"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY}
+      STORAGE_PATH: /app/storage
+    volumes:
+      - document_storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  document_storage:
+

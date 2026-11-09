@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SlideSheet AI Login</title>
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body data-page="login">
+    <main class="auth-wrap">
+      <section class="auth-card">
+        <h1>SlideSheet AI</h1>
+        <p class="subtitle">Sign in to access your documents and chats.</p>
+        <h2 id="authModeLabel">Login</h2>
+        <form id="authForm" class="auth-form">
+          <input id="email" type="email" placeholder="Email" required />
+          <input id="password" type="password" placeholder="Password" required />
+          <input
+            id="organizationName"
+            type="text"
+            placeholder="Organization Name"
+            style="display: none"
+          />
+          <button type="submit" class="btn">Continue</button>
+        </form>
+        <p id="authStatus" class="status"></p>
+        <p class="auth-switch">
+          Need an account?
+          <button id="toggleModeBtn" type="button">Switch to register</button>
+        </p>
+      </section>
+    </main>
+    <script src="/assets/app.js"></script>
+  </body>
+</html>
